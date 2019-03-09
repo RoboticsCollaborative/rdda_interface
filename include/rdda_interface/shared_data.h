@@ -9,6 +9,7 @@
 typedef struct ticket_lock {
     pthread_mutex_t mutex;
     pthread_cond_t cond;
+    int queue_head, queue_tail;
 } ticket_lock_t;
 
 typedef struct shared_in {

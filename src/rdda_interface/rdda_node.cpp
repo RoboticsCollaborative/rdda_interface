@@ -19,19 +19,19 @@ void RDDNode::pubJointStates() {
 //    std_msgs::Float64 position_msg;
     rdda_interface::JointStates JointStates_msg;
     JointStates_msg.act_pos.resize(7);
-    ticket_lock(&shared_out->queue);
+    int ticket = ticket_lock(&shared_out->queue);
 //    position_msg.data = shared_out->act_pos; /* Publish actual position */
     JointStates_msg.act_pos[0] = shared_out->act_pos; /* Publish actual position */
-    ticket_unlock(&shared_out->queue);
+    ticket_unlock(&shared_out->queue, ticket);
     ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
     rdda_joint_pub.publish(JointStates_msg);
 }
 
 /* Subscriber callback */
 void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
-    ticket_lock(&shared_in->queue);
+    int ticket = ticket_lock(&shared_in->queue);
     shared_in->tg_pos = msg->tg_pos[0];
-    ticket_unlock(&shared_in->queue);
+    ticket_unlock(&shared_in->queue, ticket);
     ROS_INFO("set target position: %lf", msg->tg_pos[0]);
 }
 
