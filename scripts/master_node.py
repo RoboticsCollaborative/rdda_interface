@@ -27,7 +27,7 @@ def run():
     global i
     msg = JointCommands()
     while not rospy.is_shutdown():
-	pos = math.cos(2*3.14159/100 * i)
+	pos = math.cos(2*3.14159/1000 * i)
         if len(msg.tg_pos):
    	    msg.tg_pos[0] = pos
     	else:

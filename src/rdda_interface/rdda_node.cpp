@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     ticket_init(&shared_out->queue);
 
     /* Initialise ROS node */
-    ros::init(argc, argv, "rdd");
+    ros::init(argc, argv, "rdd_node");
     printf("Launch ros interface\n");
 
     ros::NodeHandle node("~");
