@@ -7,8 +7,10 @@ RDDNode::RDDNode(ros::NodeHandle &node, shared_in_t *in, shared_out_t *out) {
     nh_ = node;
     shared_in = in;
     shared_out = out;
+    /* Comment out for remote test */
+    //
     rdda_joint_sub = nh_.subscribe("/rdd/joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
-//    actual_position_pub = nh_.advertise<std_msgs::Float64>("/rdd/actual_position", 1);
+    //
     rdda_joint_pub = nh_.advertise<rdda_interface::JointStates>("/rdd/joint_stats", 1);
 }
 
@@ -16,24 +18,25 @@ RDDNode::~RDDNode() {};
 
 /* Publish joint state */
 void RDDNode::pubJointStates() {
-//    std_msgs::Float64 position_msg;
     rdda_interface::JointStates JointStates_msg;
     JointStates_msg.act_pos.resize(7);
     int ticket = ticket_lock(&shared_out->queue);
-//    position_msg.data = shared_out->act_pos; /* Publish actual position */
     JointStates_msg.act_pos[0] = shared_out->act_pos; /* Publish actual position */
-    ticket_unlock(&shared_out->queue, ticket);
+    ticket_unlock(&shared_out->queue);
     ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
     rdda_joint_pub.publish(JointStates_msg);
 }
 
 /* Subscriber callback */
+/* Comment out callback for remote test */
+//
 void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
     int ticket = ticket_lock(&shared_in->queue);
     shared_in->tg_pos = msg->tg_pos[0];
-    ticket_unlock(&shared_in->queue, ticket);
+    ticket_unlock(&shared_in->queue);
     ROS_INFO("set target position: %lf", msg->tg_pos[0]);
 }
+//
 
 /* Run loop */
 void RDDNode::run() {
