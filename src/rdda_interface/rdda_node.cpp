@@ -20,10 +20,15 @@ RDDNode::~RDDNode() {};
 void RDDNode::pubJointStates() {
     rdda_interface::JointStates JointStates_msg;
     JointStates_msg.act_pos.resize(7);
-    int ticket = ticket_lock(&shared_out->queue);
+
+    ticket_lock(&shared_out->queue);
     JointStates_msg.act_pos[0] = shared_out->act_pos; /* Publish actual position */
-    JointStates_msg.act_pos[1] = shared_out->timestamp; /* Timestamp */
+//    JointStates_msg.act_pos[1] = shared_out->timestamp; /* Timestamp */
+    JointStates_msg.timestamp = shared_out->timestamp; /* Timestamp */
     ticket_unlock(&shared_out->queue);
+
+    JointStates_msg.header.frame_id = "time_frame";
+    JointStates_msg.header.stamp = ros::Time::now();
     ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
     rdda_joint_pub.publish(JointStates_msg);
 }
@@ -32,9 +37,11 @@ void RDDNode::pubJointStates() {
 /* Comment out callback for remote test */
 /*
 void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
-    int ticket = ticket_lock(&shared_in->queue);
+
+    ticket_lock(&shared_in->queue);
     shared_in->tg_pos = msg->tg_pos[0];
     ticket_unlock(&shared_in->queue);
+
     ROS_INFO("set target position: %lf", msg->tg_pos[0]);
 }
 */
