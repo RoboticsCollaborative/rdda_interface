@@ -22,14 +22,15 @@ void RDDNode::pubJointStates() {
     JointStates_msg.act_pos.resize(7);
 
     ticket_lock(&shared_out->queue);
+    JointStates_msg.header.frame_id = "time_frame";
+    JointStates_msg.header.stamp.sec = shared_out->sec; /* Timestamp */
+    JointStates_msg.header.stamp.nsec = shared_out->nsec;
     JointStates_msg.act_pos[0] = shared_out->act_pos; /* Publish actual position */
 //    JointStates_msg.act_pos[1] = shared_out->timestamp; /* Timestamp */
-    JointStates_msg.timestamp = shared_out->timestamp; /* Timestamp */
+//    JointStates_msg.timestamp = shared_out->timestamp; /* Timestamp */
     ticket_unlock(&shared_out->queue);
 
-    JointStates_msg.header.frame_id = "time_frame";
-    JointStates_msg.header.stamp = ros::Time::now();
-    ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
+   ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
     rdda_joint_pub.publish(JointStates_msg);
 }
 
