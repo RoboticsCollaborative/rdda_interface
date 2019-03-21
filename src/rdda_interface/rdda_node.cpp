@@ -22,12 +22,12 @@ void RDDNode::pubJointStates() {
     JointStates_msg.act_pos.resize(7);
 
     ticket_lock(&shared_out->queue);
-    JointStates_msg.header.frame_id = "time_frame";
-    JointStates_msg.header.stamp.sec = shared_out->sec; /* Timestamp */
-    JointStates_msg.header.stamp.nsec = shared_out->nsec;
-    JointStates_msg.act_pos[0] = shared_out->act_pos; /* Publish actual position */
-//    JointStates_msg.act_pos[1] = shared_out->timestamp; /* Timestamp */
-//    JointStates_msg.timestamp = shared_out->timestamp; /* Timestamp */
+    if (shared_out->chk == 1) {
+    	JointStates_msg.header.frame_id = "time_frame";
+    	JointStates_msg.header.stamp.sec = shared_out->timestamp.sec; /* Timestamp */
+    	JointStates_msg.header.stamp.nsec = shared_out->timestamp.nsec;
+    	JointStates_msg.act_pos[0] = shared_out->act_pos; /* Publish actual position */
+    }
     ticket_unlock(&shared_out->queue);
 
    ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
@@ -59,7 +59,6 @@ void RDDNode::run() {
     }
 }
 
-/* Initialise shared memory and run */
 int main(int argc, char** argv) {
 
     /* Local variables */
@@ -80,7 +79,6 @@ int main(int argc, char** argv) {
 	fprintf(stderr, "Open(shared_in)\n");
 	return -1;
     }
-
     /* Initialise ticket lock */
     ticket_init(&shared_in->queue);
 
@@ -91,9 +89,16 @@ int main(int argc, char** argv) {
 	fprintf(stderr, "Open(shared_out)\n");
 	return -1;
     }
-
     /* Initialise ticket lock */
     ticket_init(&shared_out->queue);
+
+    /* initialise memory data*/	
+    ticket_lock(&shared_out->queue);
+    shared_out->chk = 0;
+    shared_out->act_pos = (double)0.0;
+    shared_out->timestamp.sec = 0;
+    shared_out->timestamp.nsec = 0;
+    ticket_unlock(&shared_out->queue);
 
     /* Initialise ROS node */
     ros::init(argc, argv, "rdd_node");
