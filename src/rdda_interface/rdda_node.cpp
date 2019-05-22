@@ -67,12 +67,6 @@ void RDDNode::run() {
 
 int main(int argc, char** argv) {
 
-    /* Local variables */
-    void *p;	/* Intermediate pointer */
-    // int err; 	/* Error number */
-    int i;	 	/* Loop iterations */
-    double pos = 0.0; 
-
     /* Instanciate input-output data varibles */
     Rdda *rdda;
 
