@@ -29,6 +29,9 @@ void RDDNode::pubJointStates() {
     	JointStates_msg.act_pos[0] = shared_out->act_pos;
     }
     */
+    JointStates_msg.header.frame_id = "time_frame";
+    JointStates_msg.header.stamp.sec = rdda->ts.sec;
+    JointStates_msg.header.stamp.nsec = rdda->ts.nsec;
     JointStates_msg.act_pos[0] = rdda->motor->motorIn.act_pos;
     mutex_unlock(&rdda->mutex);
 

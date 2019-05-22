@@ -44,12 +44,17 @@ typedef struct
     AnalogIn analogIn;
 } EL3102_slave;
 
+/** Timestamp */
+typedef struct {
+    int64_t sec;
+    int64_t nsec;
+} Timestamp;
+
 /** EtherCAT slave class */
-typedef struct
-{
+typedef struct {
     BEL_slave motor[2];
     EL3102_slave psensor;
-    struct timespec ts;
+    Timestamp ts;
     pthread_mutex_t mutex;
 } Rdda;
 
