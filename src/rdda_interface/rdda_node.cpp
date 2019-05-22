@@ -3,10 +3,9 @@
 using namespace std;
 
 /* RDDNode constructor */
-RDDNode::RDDNode(ros::NodeHandle &node, shared_in_t *in, shared_out_t *out) {
+    RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     nh_ = node;
-    shared_in = in;
-    shared_out = out;
+    rdda = rddaptr;
     /* Comment out for remote test */
     /*
     rdda_joint_sub = nh_.subscribe("/rdd/joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
@@ -21,16 +20,19 @@ void RDDNode::pubJointStates() {
     rdda_interface::JointStates JointStates_msg;
     JointStates_msg.act_pos.resize(7);
 
-    ticket_lock(&shared_out->queue);
+    mutex_lock(&rdda->mutex);
+    /*
     if (shared_out->chk == 1) {
     	JointStates_msg.header.frame_id = "time_frame";
-    	JointStates_msg.header.stamp.sec = shared_out->timestamp.sec; /* Timestamp */
+    	JointStates_msg.header.stamp.sec = shared_out->timestamp.sec;
     	JointStates_msg.header.stamp.nsec = shared_out->timestamp.nsec;
-    	JointStates_msg.act_pos[0] = shared_out->act_pos; /* Publish actual position */
+    	JointStates_msg.act_pos[0] = shared_out->act_pos;
     }
-    ticket_unlock(&shared_out->queue);
+    */
+    JointStates_msg.act_pos[0] = rdda->motor->motorIn.act_pos;
+    mutex_unlock(&rdda->mutex);
 
-   ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
+    ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
     rdda_joint_pub.publish(JointStates_msg);
 }
 
@@ -68,44 +70,21 @@ int main(int argc, char** argv) {
     double pos = 0.0; 
 
     /* Instanciate input-output data varibles */
-    shared_in_t *shared_in;
-    shared_out_t *shared_out;
+    Rdda *rdda;
 
     /* Map data structs to shared memory */
     /* Open and obtain shared memory pointers for master-input data */
-    if (!openSharedMemory(SHARED_IN, &p)) {
-	shared_in = (shared_in_t *) p;
-    } else {
-	fprintf(stderr, "Open(shared_in)\n");
-	return -1;
+    rdda = initRdda();
+    if (rdda == NULL) {
+        fprintf(stderr, "Init rdda failed.\n");
+        exit(1);
     }
-    /* Initialise ticket lock */
-    ticket_init(&shared_in->queue);
-
-    /* Open and obtain shared memory pointers for master-output data */
-    if (!openSharedMemory(SHARED_OUT, &p)) {
-	shared_out = (shared_out_t *) p;
-    } else {
-	fprintf(stderr, "Open(shared_out)\n");
-	return -1;
-    }
-    /* Initialise ticket lock */
-    ticket_init(&shared_out->queue);
-
-    /* initialise memory data*/	
-    ticket_lock(&shared_out->queue);
-    shared_out->chk = 0;
-    shared_out->act_pos = (double)0.0;
-    shared_out->timestamp.sec = 0;
-    shared_out->timestamp.nsec = 0;
-    ticket_unlock(&shared_out->queue);
 
     /* Initialise ROS node */
     ros::init(argc, argv, "rdd_node");
     printf("Launch ros interface\n");
 
     ros::NodeHandle node("~");
-    RDDNode rdd(node, shared_in, shared_out);
+    RDDNode rdd(node, rdda);
     rdd.run();
-
 }

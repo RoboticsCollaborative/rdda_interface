@@ -12,13 +12,13 @@
 
 /* C headers */
 extern "C" {
-#include "./shared_data.h" 
-#include "./shared_memory.h"
+#include "shm_data.h"
+#include "shm.h"
 };
 
 class RDDNode {
  public:
-    explicit RDDNode(ros::NodeHandle& node, shared_in_t *in, shared_out_t *out);
+    explicit RDDNode(ros::NodeHandle& node, Rdda *rdda);
 
     ~RDDNode();
 
@@ -29,8 +29,7 @@ class RDDNode {
     ros::Subscriber rdda_joint_sub;
     ros::Publisher rdda_joint_pub;
 
-    shared_in_t *shared_in;
-    shared_out_t *shared_out;
+    Rdda *rdda;
 
     void pubJointStates();
     void subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg);

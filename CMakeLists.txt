@@ -123,7 +123,7 @@ include_directories(
 
 ## Declare a C++/C library
 add_library(${PROJECT_NAME}_src
-    src/rdda_interface/shared_memory.c
+    src/rdda_interface/shm.c
 )
 
 ## Add cmake target dependencies of the library
