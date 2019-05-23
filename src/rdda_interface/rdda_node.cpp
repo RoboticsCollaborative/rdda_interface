@@ -28,10 +28,11 @@ void RDDNode::pubJointStates() {
     JointStates_msg.act_pos[0] = rdda->motor[0].motorIn.act_pos;
     JointStates_msg.act_pos[1] = rdda->motor[1].motorIn.act_pos;
     */
+    JointStates_msg.act_pos[0] = rdda->motor[0].motorIn.act_pos;
     mutex_unlock(&rdda->mutex);
 
-    //ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
-    ROS_INFO("ROS interface testing...");
+    ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
+    //ROS_INFO("ROS interface testing...");
     rdda_joint_pub.publish(JointStates_msg);
 }
 
