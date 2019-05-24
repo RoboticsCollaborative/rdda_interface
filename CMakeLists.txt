@@ -48,6 +48,8 @@ find_package(Boost COMPONENTS system python thread program_options REQUIRED)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
+    DIRECTORY
+    msg
     FILES
     JointCommands.msg
     JointStates.msg
@@ -153,6 +155,7 @@ target_link_libraries(${PROJECT_NAME}_node
     ${Boost_LIBRARIES}
     ${PROJECT_NAME}_src
 )
+add_dependencies(${PROJECT_NAME}_node rdda_interface_generate_messages_cpp)
 
 #############
 ## Install ##
