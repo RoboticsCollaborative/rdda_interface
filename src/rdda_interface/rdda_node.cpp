@@ -7,9 +7,7 @@ using namespace std;
     nh_ = node;
     rdda = rddaptr;
     /* Comment out for remote test */
-    /*
     rdda_joint_sub = nh_.subscribe("/rdd/joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
-    */
     rdda_joint_pub = nh_.advertise<rdda_interface::JointStates>("/rdd/joint_stats", 1);
 }
 
@@ -45,16 +43,18 @@ void RDDNode::pubJointStates() {
 
 /* Subscriber callback */
 /* Comment out callback for remote test */
-/*
 void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
 
-    ticket_lock(&shared_in->queue);
-    shared_in->tg_pos = msg->tg_pos[0];
-    ticket_unlock(&shared_in->queue);
+    mutex_lock(&rdda->mutex);
+    /*
+    for (int i=0; i<2; ++i) {
+        rdda->motor[i].motorOut.vel_off = msg->vel_sat[i];
+    }
+    mutex_unlock(&rdda->mutex);
+    */
 
-    ROS_INFO("set target position: %lf", msg->tg_pos[0]);
+    ROS_INFO("set vel_sat[0]: %lf", msg->vel_sat[0]);
 }
-*/
 
 /* Run loop */
 void RDDNode::run() {
