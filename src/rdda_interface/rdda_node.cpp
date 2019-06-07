@@ -36,7 +36,7 @@ void RDDNode::pubJointStates() {
     }
     mutex_unlock(&rdda->mutex);
 
-    ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
+    //ROS_INFO("Publish joint states [position]: %lf", JointStates_msg.act_pos[0]);
     //ROS_INFO("ROS interface testing...");
     rdda_joint_pub.publish(JointStates_msg);
 }
@@ -46,12 +46,10 @@ void RDDNode::pubJointStates() {
 void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
 
     mutex_lock(&rdda->mutex);
-    /*
     for (int i=0; i<2; ++i) {
         rdda->motor[i].motorOut.vel_off = msg->vel_sat[i];
     }
     mutex_unlock(&rdda->mutex);
-    */
 
     ROS_INFO("set vel_sat[0]: %lf", msg->vel_sat[0]);
 }
