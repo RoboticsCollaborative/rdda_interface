@@ -20,13 +20,6 @@ void RDDNode::pubJointStates() {
     JointStates_msg.act_vel.resize(7);
 
     mutex_lock(&rdda->mutex);
-    /*
-    JointStates_msg.header.frame_id = "time_frame";
-    JointStates_msg.header.stamp.sec = rdda->ts.sec;
-    JointStates_msg.header.stamp.nsec = rdda->ts.nsec;
-    JointStates_msg.act_pos[0] = rdda->motor[0].motorIn.act_pos;
-    JointStates_msg.act_pos[1] = rdda->motor[1].motorIn.act_pos;
-    */
     for (int i=0; i<2; ++i) {
  	JointStates_msg.header.frame_id = "time_frame";
     	JointStates_msg.header.stamp.sec = rdda->ts.sec;
@@ -47,11 +40,15 @@ void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::Con
 
     mutex_lock(&rdda->mutex);
     for (int i=0; i<2; ++i) {
-        rdda->motor[i].motorOut.vel_off = msg->vel_sat[i];
+        rdda->motor[i].rosOut.pos_ref = msg->pos_ref[i];
+	rdda->motor[i].rosOut.vel_sat = msg->vel_sat[i];
+	rdda->motor[i].rosOut.tau_sat = msg->tau_sat[i];
+	rdda->motor[i].rosOut.stiffness = msg->stiffness[i];
+	rdda->freq_anti_alias = msg->freq_anti_alias;
     }
     mutex_unlock(&rdda->mutex);
 
-    ROS_INFO("set vel_sat[0]: %lf", msg->vel_sat[0]);
+    ROS_INFO("set pos_ref[0]: %lf", msg->pos_ref[0]);
 }
 
 /* Run loop */
