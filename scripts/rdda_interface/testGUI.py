@@ -13,7 +13,7 @@ class RosThread(QtCore.QThread):
     def __init__(self, pos_ref):
         QtCore.QThread.__init__(self)
         self.pos_ref = pos_ref
-        self.flag = 1
+        self._isRunning = True
 
 
     def run(self):
@@ -21,7 +21,7 @@ class RosThread(QtCore.QThread):
         rate = rospy.Rate(500)
 
         while not rospy.is_shutdown():
-            if self.flag == 1:
+            if self._isRunning == True:
                 rdda.publish_joint_cmds(self.pos_ref)
                 rospy.loginfo("set pos_ref[0]: " + str(self.pos_ref))
                 rate.sleep()
@@ -32,8 +32,7 @@ class RosThread(QtCore.QThread):
 
 
     def stop(self):
-        self.flag = 0
-        #RddaGui.btnCls.clicked.connect(QtCore.QCoreApplication.instance().quit)
+        self._isRunning = False
 
 
 class RddaGui(QtGui.QWidget):
@@ -55,19 +54,15 @@ class RddaGui(QtGui.QWidget):
 
         btnRun = QPushButton('Run')
         btnRun.setFixedWidth(150)
-        btnRun.clicked.connect(self.start_ros)
-        self.btnCls = QPushButton('Close')
+        self.btnCls = QPushButton('Stop')
         self.btnCls.setFixedWidth(150)
-        #self.btnCls.clicked.connect(RosThread.stop)
         sldPos = QSlider()
         sldPos.setOrientation(Qt.Horizontal)
-        sldPos.valueChanged.connect(self.set_pos)
-        sldPos.setMinimum(-100)
+        sldPos.setMinimum(0)
         sldPos.setMaximum(100)
         sldStf = QSlider()
         sldStf.setOrientation(Qt.Horizontal)
-        sldStf.valueChanged.connect(self.set_stf)
-        sldStf.setMinimum(-100)
+        sldStf.setMinimum(0)
         sldStf.setMaximum(100)
         self.labelPos = QLabel()
         self.labelPos.setFixedWidth(200)
@@ -98,6 +93,15 @@ class RddaGui(QtGui.QWidget):
         layout.addLayout(hboxBtn)
         self.setLayout(layout)
 
+        self.rosThread = RosThread(self.joint_cmds)
+
+        btnRun.clicked.connect(self.start_ros)
+        self.btnCls.clicked.connect(self.rosThread.stop)
+        sldPos.valueChanged.connect(self.set_pos)
+        sldStf.valueChanged.connect(self.set_stf)
+
+#        self.finished.connect(self.stop_thread)
+
 
     def set_pos(self, value):
         self.labelPos.setText("Position: " + str(value))
@@ -113,10 +117,15 @@ class RddaGui(QtGui.QWidget):
 
     def start_ros(self):
         self.thread_pool = []
-        rosThread = RosThread(self.joint_cmds)
-        self.thread_pool.append(rosThread)
-        rosThread.start()
+        self.thread_pool.append(self.rosThread)
+        self.rosThread.start()
 
+"""
+    def stop_thread(self):
+        self.rosThread.stop()
+        self.rosThread.quit()
+        self.rosThread.wait()
+"""
 
 if __name__ == '__main__':
     try:

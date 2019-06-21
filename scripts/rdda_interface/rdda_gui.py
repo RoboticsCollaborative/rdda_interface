@@ -13,7 +13,7 @@ class RosThread(QtCore.QThread):
     def __init__(self, pos_ref):
         QtCore.QThread.__init__(self)
         self.pos_ref = pos_ref
-        self.flag = 1
+        self._isRunning = True
 
 
     def run(self):
@@ -21,7 +21,7 @@ class RosThread(QtCore.QThread):
         rate = rospy.Rate(500)
 
         while not rospy.is_shutdown():
-            if self.flag == 1:
+            if self._isRunning == True:
                 rdda.publish_joint_cmds(self.pos_ref)
                 rospy.loginfo("set pos_ref[0]: " + str(self.pos_ref))
                 rate.sleep()
@@ -32,8 +32,7 @@ class RosThread(QtCore.QThread):
 
 
     def stop(self):
-        self.flag == 0
-
+        self._isRunning = False
 
 
 class RddaGui(QtGui.QWidget):
@@ -42,59 +41,91 @@ class RddaGui(QtGui.QWidget):
         super(RddaGui, self).__init__()
 
         self.setObjectName('RddaGui')
-        self.init_ui()
+        self.initUI()
 
 
-    def init_ui(self):
+    def initUI(self):
 
         """Initialize ROS node."""
         self.joint_cmds = ([0.0, 0.0], [0.0, 0.0])
-        self.pos_ref = [0.0, 0.0]
 
-        btn = QPushButton()
-        btn.setFixedWidth(130)
-        btn.setText('Run')
-        btn.clicked.connect(self.start_ros)
+        self.setGeometry(300, 300, 500, 300)
+        self.setWindowTitle('RDDA_GUI')
 
-        hlay = QHBoxLayout()
-        hlay.addWidget(btn)
-        hlay.addSpacing(50)
+        btnRun = QPushButton('Run')
+        btnRun.setFixedWidth(150)
+        self.btnCls = QPushButton('Stop')
+        self.btnCls.setFixedWidth(150)
+        sldPos = QSlider()
+        sldPos.setOrientation(Qt.Horizontal)
+        sldPos.setMinimum(0)
+        sldPos.setMaximum(100)
+        sldStf = QSlider()
+        sldStf.setOrientation(Qt.Horizontal)
+        sldStf.setMinimum(0)
+        sldStf.setMaximum(100)
+        self.labelPos = QLabel()
+        self.labelPos.setFixedWidth(200)
+        self.labelPos.setText("Position: " + str(0))
+        self.labelStf = QLabel()
+        self.labelStf.setFixedWidth(200)
+        self.labelStf.setText("Stiffness: " + str(0))
 
-        self.label = QLabel()
-        self.label.setFixedWidth(140)
-        self.label.setText("pos_ref: " + str(0))
-        self.label.setEnabled(False)
+        hboxBtn = QHBoxLayout()
+        hboxBtn.addStretch(1)
+        hboxBtn.addWidget(btnRun)
+        hboxBtn.addSpacing(20)
+        hboxBtn.addWidget(self.btnCls)
 
-        hlay.addWidget(self.label)
+        hboxPos = QHBoxLayout()
+        hboxPos.addWidget(sldPos)
+        hboxPos.addSpacing(50)
+        hboxPos.addWidget(self.labelPos)
 
-        slider = QSlider()
-        slider.setMinimum(-100)
-        slider.setMaximum(100)
-        slider.setOrientation(Qt.Horizontal)
-        slider.valueChanged.connect(self.set_pos)
-        #slider.setTickInterval(0.1)
-        #slider.setSingleStep(0.1)
-
-        vlay = QVBoxLayout()
-        vlay.addWidget(slider)
+        hboxStf = QHBoxLayout()
+        hboxStf.addWidget(sldStf)
+        hboxStf.addSpacing(50)
+        hboxStf.addWidget(self.labelStf)
 
         layout = QVBoxLayout()
-        layout.addLayout(hlay)
-        layout.addLayout(vlay)
+        layout.addLayout(hboxPos)
+        layout.addLayout(hboxStf)
+        layout.addLayout(hboxBtn)
         self.setLayout(layout)
+
+        self.rosThread = RosThread(self.joint_cmds)
+
+        btnRun.clicked.connect(self.start_ros)
+        self.btnCls.clicked.connect(self.rosThread.stop)
+        sldPos.valueChanged.connect(self.set_pos)
+        sldStf.valueChanged.connect(self.set_stf)
+
+#        self.finished.connect(self.stop_thread)
 
 
     def set_pos(self, value):
-        self.label.setText("pos_ref: " + str(value))
-        self.pos_ref[0] = value
+        self.labelPos.setText("Position: " + str(value))
+        self.joint_cmds[0][0] = -value
+        self.joint_cmds[0][1] = value
+
+
+    def set_stf(self, value):
+        self.labelStf.setText("Stifness: " + str(value))
+        self.joint_cmds[1][0] = value
+        self.joint_cmds[1][1] = value
 
 
     def start_ros(self):
         self.thread_pool = []
-        rosThread = RosThread(self.pos_ref)
-        self.thread_pool.append(rosThread)
-        rosThread.start()
+        self.thread_pool.append(self.rosThread)
+        self.rosThread.start()
 
+"""
+    def stop_thread(self):
+        self.rosThread.stop()
+        self.rosThread.quit()
+        self.rosThread.wait()
+"""
 
 if __name__ == '__main__':
     try:
