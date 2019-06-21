@@ -16,10 +16,10 @@ class RddaProxy:
         self.act_pos = msg.data.act_pos
         self.act_vel = msg.data.act_vel
 
-    def publish_joint_cmds(self, pos_ref):
+    def publish_joint_cmds(self, joint_commands):
         joint_cmd_msg = JointCommands()
-        joint_cmd_msg.pos_ref = pos_ref
-        joint_cmd_msg.pos_ref = [0.0, 0.0]
+        joint_cmd_msg.pos_ref = joint_commands[0]
+        joint_cmd_msg.stiffness = joint_commands[1]
 
         self.joint_pub.publish(joint_cmd_msg)
 

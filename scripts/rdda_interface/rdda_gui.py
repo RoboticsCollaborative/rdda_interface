@@ -3,9 +3,37 @@
 import sys
 import rospy
 from RddaProxy import RddaProxy
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QSlider, QPushButton
 from PyQt4.QtCore import Qt
+
+
+class RosThread(QtCore.QThread):
+
+    def __init__(self, pos_ref):
+        QtCore.QThread.__init__(self)
+        self.pos_ref = pos_ref
+        self.flag = 1
+
+
+    def run(self):
+        rdda = RddaProxy()
+        rate = rospy.Rate(500)
+
+        while not rospy.is_shutdown():
+            if self.flag == 1:
+                rdda.publish_joint_cmds(self.pos_ref)
+                rospy.loginfo("set pos_ref[0]: " + str(self.pos_ref))
+                rate.sleep()
+            else:
+                break
+
+        print 'Terminate ROS'
+
+
+    def stop(self):
+        self.flag == 0
+
 
 
 class RddaGui(QtGui.QWidget):
@@ -22,12 +50,11 @@ class RddaGui(QtGui.QWidget):
         """Initialize ROS node."""
         self.joint_cmds = ([0.0, 0.0], [0.0, 0.0])
         self.pos_ref = [0.0, 0.0]
-        self.rdda = RddaProxy()
 
         btn = QPushButton()
         btn.setFixedWidth(130)
-        btn.setText('Publisher')
-        btn.clicked.connect(self.pub_pos)
+        btn.setText('Run')
+        btn.clicked.connect(self.start_ros)
 
         hlay = QHBoxLayout()
         hlay.addWidget(btn)
@@ -56,15 +83,17 @@ class RddaGui(QtGui.QWidget):
         layout.addLayout(vlay)
         self.setLayout(layout)
 
-    def pub_pos(self):
-        self.rdda.publish_joint_cmds(self.pos_ref)
-
-        rospy.loginfo("set pos_ref[0]: " + str(self.pos_ref))
-
 
     def set_pos(self, value):
         self.label.setText("pos_ref: " + str(value))
         self.pos_ref[0] = value
+
+
+    def start_ros(self):
+        self.thread_pool = []
+        rosThread = RosThread(self.pos_ref)
+        self.thread_pool.append(rosThread)
+        rosThread.start()
 
 
 if __name__ == '__main__':
