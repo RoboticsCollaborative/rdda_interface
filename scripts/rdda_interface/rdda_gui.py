@@ -105,14 +105,14 @@ class RddaGui(QtGui.QWidget):
 
     def set_pos(self, value):
         self.labelPos.setText("Position: " + str(value))
-        self.joint_cmds[0][0] = -value
-        self.joint_cmds[0][1] = value
+        self.joint_cmds[0][0] = float(-value)/100
+        self.joint_cmds[0][1] = float(value)/100
 
 
     def set_stf(self, value):
         self.labelStf.setText("Stifness: " + str(value))
-        self.joint_cmds[1][0] = value
-        self.joint_cmds[1][1] = value
+        self.joint_cmds[1][0] = float(value)/100
+        self.joint_cmds[1][1] = float(value)/100
 
 
     def start_ros(self):
