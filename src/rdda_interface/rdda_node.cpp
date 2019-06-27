@@ -44,10 +44,10 @@ void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::Con
     mutex_lock(&rdda->mutex);
 
     for (int i=0; i<2; ++i) {
-//        rdda->motor[i].rosOut.pos_ref = msg->pos_ref[i];
+        rdda->motor[i].rosOut.pos_ref = msg->pos_ref[i];
 //	    rdda->motor[i].rosOut.vel_sat = msg->vel_sat[i];
 //	    rdda->motor[i].rosOut.tau_sat = msg->tau_sat[i];
-//	    rdda->motor[i].rosOut.stiffness = msg->stiffness[i];
+	    rdda->motor[i].rosOut.stiffness = msg->stiffness[i];
 //	    rdda->freq_anti_alias = msg->freq_anti_alias;
     }
 
