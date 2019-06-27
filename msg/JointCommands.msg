@@ -5,4 +5,4 @@ float64[] vel_sat
 float64[] tau_sat
 
 float64[] stiffness
-int64   freq_anti_alias
+float64 freq_anti_alias

@@ -3,6 +3,8 @@
 
 /* C++ headers */
 #include <pthread.h>
+#include <string.h>
+#include <errno.h>
 
 /* ROS headers */
 #include <ros/ros.h>
