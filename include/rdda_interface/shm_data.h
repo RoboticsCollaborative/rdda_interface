@@ -60,7 +60,7 @@ typedef struct {
 typedef struct {
     BEL_slave motor[2];
     EL3102_slave psensor;
-    int freq_anti_alias;
+    double freq_anti_alias;
     Timestamp ts;
     pthread_mutex_t mutex;
 } Rdda;
