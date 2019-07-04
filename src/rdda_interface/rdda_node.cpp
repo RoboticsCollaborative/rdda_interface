@@ -26,10 +26,11 @@ void RDDNode::pubJointStates() {
     for (int i=0; i<2; ++i) {
  	    JointStates_msg.act_pos[i] = rdda->motor[i].motorIn.act_pos;
     	JointStates_msg.act_vel[i] = rdda->motor[i].motorIn.act_vel;
-    	JointStates_msg.act_tau[i] = rdda->motor[i].motorIn.act_tau;
     	JointStates_msg.ts_nsec = rdda->ts.nsec;
     	JointStates_msg.ts_sec = rdda->ts.sec;
     }
+    JointStates_msg.act_tau[0] = rdda->psensor.analogIn.val1;
+    JointStates_msg.act_tau[1] = rdda->psensor.analogIn.val2;
 
     mutex_unlock(&rdda->mutex);
 
