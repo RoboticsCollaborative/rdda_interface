@@ -7,12 +7,15 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QSlider, QPushButton
 from PyQt4.QtCore import Qt
 
+import numpy as np
+
 
 class RosThread(QtCore.QThread):
 
-    def __init__(self, pos_ref):
+    def __init__(self):
         QtCore.QThread.__init__(self)
-        self.pos_ref = pos_ref
+        self.pos_ref = np.array([0.0, 0.0])
+        self.stiffness = np.array([0.0, 0.0])
         self._isRunning = True
 
 
@@ -22,8 +25,8 @@ class RosThread(QtCore.QThread):
 
         while not rospy.is_shutdown():
             if self._isRunning == True:
-                rdda.publish_joint_cmds(self.pos_ref)
-                rospy.loginfo("set pos_ref[0]: " + str(self.pos_ref))
+                rdda.publish_joint_cmds(pos_ref=self.pos_ref, stiffness=self.stiffness)
+                rospy.loginfo("set pos_ref[0]: {}".format(self.pos_ref))
                 rate.sleep()
             else:
                 break
@@ -43,12 +46,9 @@ class RddaGui(QtGui.QWidget):
         self.setObjectName('RddaGui')
         self.initUI()
 
-
     def initUI(self):
 
         """Initialize ROS node."""
-        self.joint_cmds = ([0.0, 0.0], [0.0, 0.0])
-
         self.setGeometry(300, 300, 500, 300)
         self.setWindowTitle('RDDA_GUI')
 
@@ -93,7 +93,8 @@ class RddaGui(QtGui.QWidget):
         layout.addLayout(hboxBtn)
         self.setLayout(layout)
 
-        self.rosThread = RosThread(self.joint_cmds)
+        # self.rosThread = RosThread(self.joint_cmds)
+        self.rosThread = RosThread()
 
         btnRun.clicked.connect(self.start_ros)
         self.btnCls.clicked.connect(self.rosThread.stop)
@@ -105,15 +106,13 @@ class RddaGui(QtGui.QWidget):
 
     def set_pos(self, value):
         self.labelPos.setText("Position: " + str(value))
-        self.joint_cmds[0][0] = -value
-        self.joint_cmds[0][1] = value
-
+        pos = float(value)/100
+        self.rosThread.pos_ref = np.array([-pos, pos])
 
     def set_stf(self, value):
         self.labelStf.setText("Stifness: " + str(value))
-        self.joint_cmds[1][0] = value
-        self.joint_cmds[1][1] = value
-
+        stiffness = float(value)/100
+        self.rosThread.stiffness = np.array([stiffness, stiffness])
 
     def start_ros(self):
         self.thread_pool = []

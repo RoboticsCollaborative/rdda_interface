@@ -12,21 +12,24 @@ class RddaProxy:
         self.joint_pub = rospy.Publisher("rdd/joint_cmds", JointCommands, queue_size=1)
         self.joint_sub = rospy.Subscriber("rdd/joint_stats", JointStates, self.subjointstates_callback)
 
+        self.has_msg = False
+
         """Joint states"""
-        self.act_pos = None
-        self.act_vel = None
-        self.act_tau = None
-        self.ts_nsec = None
-        self.ts_sec = None
+        self.act_pos = (0.0, 0.0)
+        self.act_vel = (0.0, 0.0)
+        self.act_tau = (0.0, 0.0)
+        self.ts_nsec = 0.0
+        self.ts_sec = 0.0
 
     def subjointstates_callback(self, msg):
+        self.has_msg = True
         self.act_pos = msg.act_pos
         self.act_vel = msg.act_vel
         self.act_tau = msg.act_tau
         self.ts_nsec = msg.ts_nsec
         self.ts_sec = msg.ts_sec
 
-    def publish_joint_cmds(self, pos_ref=(0.0, 0.0), vel_sat=(3.0, 3.0),
+    def publish_joint_cmds(self, pos_ref=(0.0, 0.0), vel_sat=(5.0, 5.0),
                            tau_sat=(5.0, 5.0), stiffness=(0.0, 0.0), freq_anti_alias=500.0):
 
         joint_cmd_msg = JointCommands()
@@ -38,9 +41,15 @@ class RddaProxy:
 
         self.joint_pub.publish(joint_cmd_msg)
 
+    """Fingers return to origin with arbitrary initial conditions"""
     def homing(self):
+
+        """Make sure ROS message received"""
+        while not self.has_msg:
+            rospy.sleep(0.01)
+
         pos_ref = np.array([0.0, 0.0])
-        stiffness = np.array([5, 5])
+        stiffness = np.array([10, 10])
         rate = rospy.Rate(500)
         time_interval = 0.0
         tau_threshold = np.array([0.14, 0.14])
@@ -72,4 +81,20 @@ class RddaProxy:
             rate.sleep()
             done = done_finger0 and done_finger1
 
-        time.sleep(1)
+        time.sleep(0.5)
+
+    """Sinusoid wave for position tests on finger 0. 
+        Finger will start at current position, make sure enough space to move."""
+    def harmonic_wave(self):
+        pos_ref = np.array([0.0, 0.0])
+        stiffness = np.array([5.0, 5.0])
+        vel_sat = (3.0, 3.0)
+        rate = rospy.Rate(500)
+        time_interval = 0.0
+
+        while not rospy.is_shutdown():
+            time_interval += 2.0e-3
+            pos_ref[0] = -0.5 * np.sin(time_interval)
+            self.publish_joint_cmds(pos_ref=pos_ref, vel_sat=vel_sat, stiffness=stiffness)
+            rospy.loginfo("pos_ref[0]: {}".format(pos_ref[0]))
+            rate.sleep()
