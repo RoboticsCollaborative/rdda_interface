@@ -68,14 +68,14 @@ openSharedMemory(char *shm_name, void **p) {
     int fd = 0, ret = 0, err = 0; /* error detector*/
 
     /* Create or open a POSIX shared memory object */
-    fd = shm_open(shm_name, OPEN_FLAG, MODE_FLAG);  /* return 0 on success, -1 on error */
+    fd = shm_open(shm_name, O_RDWR, 0777);  /* return 0 on success, -1 on error */
     err = fd < 0;
 
     /* Resize the shared memory file */
-    if (!err) {
-        ret = ftruncate(fd, SHM_SIZE);  /* return 0 on success, -1 on error */
-        err = ret < 0;
-    }
+//    if (!err) {
+//        ret = ftruncate(fd, SHM_SIZE);  /* return 0 on success, -1 on error */
+//        err = ret < 0;
+//    }
 
     /* Map shared memory to process virtual memory space */
     if (!err) {
@@ -103,12 +103,12 @@ Rdda *initRdda() {
     if (!openSharedMemory(RDDA_DATA, &p)) {
         rdda = (Rdda *) p;
     } else {
-        fprintf(stderr, "open(RDDA_DATA)\n");
+        fprintf(stderr, "Open shared memory\n");
         return NULL;
     }
 
     /* initialise mutex lock */
-    mutex_init(&rdda->mutex);
+    //mutex_init(&rdda->mutex);
 
     return rdda;
 }
