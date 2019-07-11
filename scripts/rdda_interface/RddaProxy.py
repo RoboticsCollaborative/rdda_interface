@@ -21,6 +21,10 @@ class RddaProxy:
         self.ts_nsec = 0.0
         self.ts_sec = 0.0
 
+        self.joint_upper_bounds = [0.0, 0.0]
+        self.joint_lower_bounds = [0.0, 0.0]
+        self.joint_origins = [0.0, 0.0]
+
     def subjointstates_callback(self, msg):
         self.has_msg = True
         self.act_pos = msg.act_pos
@@ -82,6 +86,93 @@ class RddaProxy:
             done = done_finger0 and done_finger1
 
         time.sleep(0.5)
+
+    """Each finger detect two hardstops then go back to origin"""
+    def homing2(self):
+
+        """Make sure ROS message received."""
+        while not self.has_msg:
+            rospy.sleep(0.01)
+
+        pos_ref = np.array([0.0, 0.0])
+        stiffness = np.array([10, 10])
+        rate = rospy.Rate(500)
+        tau_threshold = 0.14
+        check_upper_bounds = [False, False]
+        check_lower_bounds = [False, False]
+        check_origins = [False, False]
+        time_interval = 2e-6
+
+        """Step1: Record the lower bounds of both fingers."""
+        while not rospy.is_shutdown() and not (check_lower_bounds[0] and check_lower_bounds[1]):
+            tau_measured = self.act_tau
+            pos_measured = self.act_pos
+            if not check_lower_bounds[0]:
+                if tau_measured[0] > tau_threshold:
+                    self.joint_lower_bounds[0] = pos_measured[0]
+                    check_lower_bounds[0] = True
+                else:
+                    pos_ref[0] += -1.0 * time_interval
+            if not check_lower_bounds[1]:
+                if tau_measured[1] > tau_threshold:
+                    self.joint_lower_bounds[1] = pos_measured[1]
+                    check_lower_bounds[1] = True
+                else:
+                    pos_ref[1] += -1.0 * time_interval
+            self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
+            rate.sleep()
+        time.sleep(0.1)
+
+        """Step2: Record upper bound of each finger."""
+        while not rospy.is_shutdown() and not (check_upper_bounds[0] and check_upper_bounds[1]):
+            while not check_upper_bounds[0]:
+                tau_measured = self.act_tau
+                pos_measured = self.act_pos
+                if tau_measured[0] > tau_threshold and pos_measured[0] != self.joint_lower_bounds[0]:
+                    self.joint_upper_bounds[0] = pos_measured[0]
+                    check_upper_bounds[0] = True
+                else:
+                    pos_ref[0] += time_interval
+                self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
+                rate.sleep()
+            pos_ref[0] = self.joint_lower_bounds[0]
+            self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
+            rate.sleep()
+            time.sleep(0.5)
+            while not check_upper_bounds[1]:
+                tau_measured = self.act_tau
+                pos_measured = self.act_pos
+                if tau_measured[1] > tau_threshold and pos_measured[1] != self.joint_lower_bounds[1]:
+                    self.joint_upper_bounds[1] = pos_measured[1]
+                    check_upper_bounds[1] = True
+                else:
+                    pos_ref[1] += time_interval
+                self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
+                rate.sleep()
+            pos_ref[1] = self.joint_lower_bounds[1]
+            self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
+            rate.sleep()
+            time.sleep(0.5)
+
+        """Step3: Close fingers then record origin when colliding."""
+        while not rospy.is_shutdown() and not (check_origins[0] and check_origins[1]):
+            tau_measured = self.act_tau
+            pos_measured = self.act_pos
+            if not check_origins[0]:
+                if tau_measured[0] > tau_threshold and pos_measured[0] != self.joint_upper_bounds[0]:
+                    self.joint_origins[0] = pos_measured[0]
+                    check_origins[0] = True
+                else:
+                    pos_ref[0] += -1.0 * time_interval
+            if not check_origins[1]:
+                if tau_measured[1] > tau_threshold and pos_measured[1] != self.joint_upper_bounds[1]:
+                    self.joint_origins[1] = pos_measured[1]
+                    check_origins[1] = True
+                else:
+                    pos_ref[1] += -1.0 * time_interval
+            self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
+            rate.sleep()
+        time.sleep(0.1)
 
     """Sinusoid wave for position tests on finger 0. 
         Finger will start at current position, make sure enough space to move."""
