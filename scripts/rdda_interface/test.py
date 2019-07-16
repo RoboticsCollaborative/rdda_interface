@@ -7,7 +7,9 @@ def main():
     rdda = RddaProxy()
     rospy.init_node('homing', anonymous=True)
 
+    # rdda.homing()
     # rdda.homing2()
+    # rdda.homing_vel()
     rdda.harmonic_wave()
 
 if __name__ == '__main__':
