@@ -9,8 +9,8 @@ def main():
 
     # rdda.homing()
     # rdda.homing2()
-    # rdda.homing_vel()
-    rdda.harmonic_wave()
+    rdda.homing_cmd_tau()
+    # rdda.harmonic_wave()
 
 if __name__ == '__main__':
     try:
