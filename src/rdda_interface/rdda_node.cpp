@@ -8,56 +8,85 @@ using namespace std;
     rdda = rddaptr;
     /* Comment out for remote test */
     rdda_joint_sub = nh_.subscribe("/rdd/joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
-    rdda_joint_pub = nh_.advertise<rdda_interface::JointStates>("/rdd/joint_stats", 1);
+//    rdda_joint_pub = nh_.advertise<rdda_interface::JointStates>("/rdd/joint_stats", 1);
+    rdda_joint_pub = nh_.advertise<sensor_msgs::JointState>("/rdd/joint_stats", 1);
+    rdda_ctrl_pub = nh_.advertise<rdda_interface::ControlState>("/rdd/ctrl_stats", 1);
 }
 
 RDDNode::~RDDNode() {};
 
 /* Publish joint state */
 void RDDNode::pubJointStates() {
-    rdda_interface::JointStates JointStates_msg;
-    JointStates_msg.act_pos.resize(2);
-    JointStates_msg.act_vel.resize(2);
-    JointStates_msg.ext_tau.resize(2);
-    JointStates_msg.cmd_tau.resize(2);
+//    rdda_interface::JointStates JointStates_msg;
+//    JointStates_msg.act_pos.resize(2);
+//    JointStates_msg.act_vel.resize(2);
+//    JointStates_msg.ext_tau.resize(2);
+//    JointStates_msg.cmd_tau.resize(2);
+
+    sensor_msgs::JointState JointStates_msg;
+//    JointStates_msg.name.resize(2);
+    JointStates_msg.position.resize(2);
+    JointStates_msg.velocity.resize(2);
+    JointStates_msg.effort.resize(2);
+    rdda_interface::ControlState ControlStates_msg;
+    ControlStates_msg.applied_effort.resize(2);
 
     mutex_lock(&rdda->mutex);
 
 ////    JointStates_msg.header.frame_id = "time_frame";
     for (int i=0; i<2; ++i) {
- 	    JointStates_msg.act_pos[i] = rdda->motor[i].motorIn.act_pos;
-    	JointStates_msg.act_vel[i] = rdda->motor[i].motorIn.act_vel;
-    	JointStates_msg.cmd_tau[i] = rdda->motor[i].motorIn.act_tau;
-    	JointStates_msg.ts_nsec = rdda->ts.nsec;
-    	JointStates_msg.ts_sec = rdda->ts.sec;
+// 	    JointStates_msg.act_pos[i] = rdda->motor[i].motorIn.act_pos;
+//    	JointStates_msg.act_vel[i] = rdda->motor[i].motorIn.act_vel;
+//    	JointStates_msg.cmd_tau[i] = rdda->motor[i].motorIn.act_tau;
+//    	JointStates_msg.ts_nsec = rdda->ts.nsec;
+//    	JointStates_msg.ts_sec = rdda->ts.sec;
+        JointStates_msg.position[i] = rdda->motor[i].motorIn.act_pos;
+        JointStates_msg.velocity[i] = rdda->motor[i].motorIn.act_vel;
+        ControlStates_msg.applied_effort[i] = rdda->motor[i].motorIn.act_tau;
     }
-    JointStates_msg.ext_tau[0] = rdda->psensor.analogIn.val1;
-    JointStates_msg.ext_tau[1] = rdda->psensor.analogIn.val2;
+//    JointStates_msg.ext_tau[0] = rdda->psensor.analogIn.val1;
+//    JointStates_msg.ext_tau[1] = rdda->psensor.analogIn.val2;
+    JointStates_msg.effort[0] = rdda->psensor.analogIn.val1;
+    JointStates_msg.effort[1] = rdda->psensor.analogIn.val2;
 
     mutex_unlock(&rdda->mutex);
 
 //    ROS_INFO("Publish joint states act_pos[0]: %lf", JointStates_msg.act_pos[0]);
     ROS_INFO("ROS interface running...");
     rdda_joint_pub.publish(JointStates_msg);
+    rdda_ctrl_pub.publish(ControlStates_msg);
+
 }
 
 /* Subscriber callback */
 /* Comment out callback for remote test */
-void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
+void RDDNode::subJointCommands_callback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr &msg) {
 
     mutex_lock(&rdda->mutex);
 
     for (int i=0; i<2; ++i) {
-        rdda->motor[i].rosOut.pos_ref = msg->pos_ref[i];
-	    rdda->motor[i].rosOut.vel_sat = msg->vel_sat[i];
-	    rdda->motor[i].rosOut.tau_sat = msg->tau_sat[i];
-	    rdda->motor[i].rosOut.stiffness = msg->stiffness[i];
-	    rdda->freq_anti_alias = msg->freq_anti_alias;
+        rdda->motor[i].rosOut.pos_ref = msg->positions[i];
     }
 
-    //ROS_INFO("set stiffness[0]: %lf", msg->stiffness[0]);
+    ROS_INFO("Set position reference: [%lf, %lf]", msg->positions[0], msg->positions[1]);
     mutex_unlock(&rdda->mutex);
 }
+//void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
+//
+//    mutex_lock(&rdda->mutex);
+//
+//    for (int i=0; i<2; ++i) {
+//        rdda->motor[i].rosOut.pos_ref = msg->pos_ref[i];
+//	    rdda->motor[i].rosOut.vel_sat = msg->vel_sat[i];
+//	    rdda->motor[i].rosOut.tau_sat = msg->tau_sat[i];
+//	    rdda->motor[i].rosOut.stiffness = msg->stiffness[i];
+//	    rdda->freq_anti_alias = msg->freq_anti_alias;
+//    }
+//
+//
+    //ROS_INFO("set stiffness[0]: %lf", msg->stiffness[0]);
+//    mutex_unlock(&rdda->mutex);
+//}
 
 /* Run loop */
 void RDDNode::run() {

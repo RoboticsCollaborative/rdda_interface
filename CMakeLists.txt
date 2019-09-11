@@ -53,6 +53,7 @@ add_message_files(
     FILES
     JointCommands.msg
     JointStates.msg
+    ControlState.msg
 )
 
 ## Generate services in the 'srv' folder
