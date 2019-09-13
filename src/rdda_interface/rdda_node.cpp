@@ -6,11 +6,15 @@ using namespace std;
     RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     nh_ = node;
     rdda = rddaptr;
-    /* Comment out for remote test */
+
     rdda_joint_sub = nh_.subscribe("/rdd/joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
 //    rdda_joint_pub = nh_.advertise<rdda_interface::JointStates>("/rdd/joint_stats", 1);
     rdda_joint_pub = nh_.advertise<sensor_msgs::JointState>("/rdd/joint_stats", 1);
     rdda_ctrl_pub = nh_.advertise<rdda_interface::ControlState>("/rdd/ctrl_stats", 1);
+
+    rdda_maxvel_srv = nh_.advertiseService("/rdd/set_max_vel", &RDDNode::setMaxVel, this);
+    rdda_maxeff_srv = nh_.advertiseService("/rdd/set_max_eff", &RDDNode::setMaxEffort, this);
+    rdda_stiff_srv = nh_.advertiseService("/rdd/set_stiff", &RDDNode::setStiffness, this);
 }
 
 RDDNode::~RDDNode() {};
@@ -87,6 +91,59 @@ void RDDNode::subJointCommands_callback(const trajectory_msgs::JointTrajectoryPo
     //ROS_INFO("set stiffness[0]: %lf", msg->stiffness[0]);
 //    mutex_unlock(&rdda->mutex);
 //}
+
+/* Service functions */
+bool RDDNode::setMaxVel(rdda_interface::SetMaxVelocity::Request &req, rdda_interface::SetMaxVelocity::Response &res) {
+
+    mutex_lock(&rdda->mutex);
+
+    req.max_vel.resize(2);
+
+    for (int i=0; i<2; ++i) {
+        rdda->motor[i].rosOut.vel_sat = req.max_vel[i];
+    }
+
+    res.err = 0;
+    ROS_INFO("Request: vel_sat = [%lf, %lf]", (double)req.max_vel[0], (double)req.max_vel[1]);
+    ROS_INFO("Error indicator: %d", res.err);
+
+    mutex_unlock(&rdda->mutex);
+    return true;
+}
+
+bool RDDNode::setMaxEffort(rdda_interface::SetMaxEffort::Request &req, rdda_interface::SetMaxEffort::Response &res) {
+
+    mutex_lock(&rdda->mutex);
+
+    req.max_effort.resize(2);
+
+    for (int i=0; i<2; ++i) {
+        rdda->motor[i].rosOut.tau_sat = req.max_effort[i];
+    }
+
+    res.err = 0;
+    ROS_INFO("Request: tau_sat = [%lf, %lf]", (double)req.max_effort[0], (double)req.max_effort[1]);
+
+    mutex_unlock(&rdda->mutex);
+    return true;
+}
+
+bool RDDNode::setStiffness(rdda_interface::SetStiffness::Request &req, rdda_interface::SetStiffness::Response &res) {
+
+    mutex_lock(&rdda->mutex);
+
+    req.stiffness.resize(2);
+
+    for (int i=0; i<2; ++i) {
+        rdda->motor[i].rosOut.stiffness = req.stiffness[i];
+    }
+
+    res.err = 0;
+    ROS_INFO("Request: stiffness = [%lf, %lf]", (double)req.stiffness[0], (double)req.stiffness[1]);
+
+    mutex_unlock(&rdda->mutex);
+    return true;
+}
 
 /* Run loop */
 void RDDNode::run() {
