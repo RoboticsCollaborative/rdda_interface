@@ -3,7 +3,7 @@
 using namespace std;
 
 /* RDDNode constructor */
-    RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
+RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     nh_ = node;
     rdda = rddaptr;
 
@@ -18,6 +18,30 @@ using namespace std;
 }
 
 RDDNode::~RDDNode() {};
+
+/* Initialize interface with ROS parameters. */
+void RDDNode::initConfigParams() {
+    double freq, stiff[2], max_vel[2], max_eff[2];
+
+    mutex_lock(&rdda->mutex);
+
+    for (int i=0; i<2; ++i) {
+        if (ros::param::get("~stiff", stiff[i])) {
+            rdda->motor[i].rosOut.stiffness = stiff[i];
+        }
+        if (ros::param::get("~max_vel", max_vel[i])) {
+            rdda->motor[i].rosOut.vel_sat = max_vel[i];
+        }
+        if (ros::param::get("~max_eff", max_eff[i])) {
+            rdda->motor[i].rosOut.tau_sat = max_eff[i];
+        }
+    }
+    if (ros::param::get("~anti_alias_freq", freq)) {
+        rdda->freq_anti_alias = freq;
+    }
+
+    mutex_unlock(&rdda->mutex);
+}
 
 /* Publish joint state */
 void RDDNode::pubJointStates() {
@@ -55,11 +79,12 @@ void RDDNode::pubJointStates() {
 
     mutex_unlock(&rdda->mutex);
 
-//    ROS_INFO("Publish joint states act_pos[0]: %lf", JointStates_msg.act_pos[0]);
-    ROS_INFO("ROS interface running...");
     rdda_joint_pub.publish(JointStates_msg);
     rdda_ctrl_pub.publish(ControlStates_msg);
 
+//    ROS_INFO("Publish joint states act_pos[0]: %lf\r", JointStates_msg.act_pos[0]);
+//    ROS_INFO("Publish freq[0]: %lf\r", rdda->freq_anti_alias);
+    ROS_INFO("ROS interface running...");
 }
 
 /* Subscriber callback */
@@ -177,5 +202,6 @@ int main(int argc, char** argv) {
 
     ros::NodeHandle node("~");
     RDDNode rdd(node, rdda);
+    rdd.initConfigParams();
     rdd.run();
 }

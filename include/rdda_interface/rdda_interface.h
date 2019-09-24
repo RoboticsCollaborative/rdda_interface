@@ -33,6 +33,7 @@ class RDDNode {
     ~RDDNode();
 
     void run();
+    void initConfigParams();
 
  private:
     ros::NodeHandle nh_;

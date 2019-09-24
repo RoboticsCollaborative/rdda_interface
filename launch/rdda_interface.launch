@@ -11,7 +11,7 @@
   -->
 
   <!-- rdda_interface.launch -->
-  <arg name="anti_alias_freq"	default="500.0"	doc="Loop rate at 500Hz for ROS applications. Note: This contracts with the control driver and is inchangeable."/>
+  <arg name="anti_alias_freq"	default="20.0"	doc="Loop rate at 20Hz for ROS applications. Note: This contracts with the control driver and is inchangeable."/>
   <arg name="max_vel" 		default="5.0"	doc="Velocity saturation of each joint."/>
   <arg name="max_eff"		default="5.0"	doc="Torque saturation of each joint."/>
   <arg name="stiff"		default="1.0"	doc="Stiffness of each joint. This value should be in the range of 0~20."/>
