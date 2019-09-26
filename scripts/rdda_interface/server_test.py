@@ -5,9 +5,9 @@ import rospy
 from rdda_interface.srv import *
 
 def set_stiffness_client(stiffness):
-    rospy.wait_for_service('/rdd/set_stiff')
+    rospy.wait_for_service('/rdda_interface/set_stiff')
     try:
-        set_stiff = rospy.ServiceProxy('/rdd/set_stiff', SetStiffness)
+        set_stiff = rospy.ServiceProxy('/rdda_interface/set_stiff', SetStiffness)
         res = set_stiff(stiffness)
         return res
     except rospy.ServiceException, e:

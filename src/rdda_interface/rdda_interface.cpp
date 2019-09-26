@@ -8,7 +8,6 @@ RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     rdda = rddaptr;
 
     rdda_joint_sub = nh_.subscribe("joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
-//    rdda_joint_pub = nh_.advertise<rdda_interface::JointStates>("/rdd/joint_stats", 1);
     rdda_joint_pub = nh_.advertise<sensor_msgs::JointState>("joint_stats", 1);
     rdda_ctrl_pub = nh_.advertise<rdda_interface::ControlState>("ctrl_stats", 1);
 
@@ -17,7 +16,7 @@ RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     rdda_stiff_srv = nh_.advertiseService("set_stiff", &RDDNode::setStiffness, this);
 }
 
-RDDNode::~RDDNode() {};
+RDDNode::~RDDNode() = default;
 
 /* Initialize interface with ROS parameters. */
 void RDDNode::initConfigParams() {
@@ -45,14 +44,8 @@ void RDDNode::initConfigParams() {
 
 /* Publish joint state */
 void RDDNode::pubJointStates() {
-//    rdda_interface::JointStates JointStates_msg;
-//    JointStates_msg.act_pos.resize(2);
-//    JointStates_msg.act_vel.resize(2);
-//    JointStates_msg.ext_tau.resize(2);
-//    JointStates_msg.cmd_tau.resize(2);
 
     sensor_msgs::JointState JointStates_msg;
-//    JointStates_msg.name.resize(2);
     JointStates_msg.position.resize(2);
     JointStates_msg.velocity.resize(2);
     JointStates_msg.effort.resize(2);
@@ -63,17 +56,12 @@ void RDDNode::pubJointStates() {
 
 ////    JointStates_msg.header.frame_id = "time_frame";
     for (int i=0; i<2; ++i) {
-// 	    JointStates_msg.act_pos[i] = rdda->motor[i].motorIn.act_pos;
-//    	JointStates_msg.act_vel[i] = rdda->motor[i].motorIn.act_vel;
-//    	JointStates_msg.cmd_tau[i] = rdda->motor[i].motorIn.act_tau;
-//    	JointStates_msg.ts_nsec = rdda->ts.nsec;
-//    	JointStates_msg.ts_sec = rdda->ts.sec;
+        JointStates_msg.header.stamp.sec = rdda->ts.sec;
+        JointStates_msg.header.stamp.nsec = rdda->ts.nsec;
         JointStates_msg.position[i] = rdda->motor[i].motorIn.act_pos;
         JointStates_msg.velocity[i] = rdda->motor[i].motorIn.act_vel;
         ControlStates_msg.applied_effort[i] = rdda->motor[i].motorIn.act_tau;
     }
-//    JointStates_msg.ext_tau[0] = rdda->psensor.analogIn.val1;
-//    JointStates_msg.ext_tau[1] = rdda->psensor.analogIn.val2;
     JointStates_msg.effort[0] = rdda->psensor.analogIn.val1;
     JointStates_msg.effort[1] = rdda->psensor.analogIn.val2;
 
@@ -82,40 +70,24 @@ void RDDNode::pubJointStates() {
     rdda_joint_pub.publish(JointStates_msg);
     rdda_ctrl_pub.publish(ControlStates_msg);
 
-//    ROS_INFO("Publish joint states act_pos[0]: %lf\r", JointStates_msg.act_pos[0]);
+//    ROS_INFO("Publish joint states act_pos[0]: %lf\r", JointStates_msg.position[0]);
 //    ROS_INFO("Publish freq[0]: %lf\r", rdda->freq_anti_alias);
     ROS_INFO("ROS interface running...");
 }
 
 /* Subscriber callback */
 /* Comment out callback for remote test */
-void RDDNode::subJointCommands_callback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr &msg) {
+void RDDNode::subJointCommands_callback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr &JointCommands_msg) {
 
     mutex_lock(&rdda->mutex);
 
     for (int i=0; i<2; ++i) {
-        rdda->motor[i].rosOut.pos_ref = msg->positions[i];
+        rdda->motor[i].rosOut.pos_ref = JointCommands_msg->positions[i];
     }
 
-    ROS_INFO("Set position reference: [%lf, %lf]", msg->positions[0], msg->positions[1]);
+    ROS_INFO("Set position reference: [%lf, %lf]", JointCommands_msg->positions[0], JointCommands_msg->positions[1]);
     mutex_unlock(&rdda->mutex);
 }
-//void RDDNode::subJointCommands_callback(const rdda_interface::JointCommands::ConstPtr& msg) {
-//
-//    mutex_lock(&rdda->mutex);
-//
-//    for (int i=0; i<2; ++i) {
-//        rdda->motor[i].rosOut.pos_ref = msg->pos_ref[i];
-//	    rdda->motor[i].rosOut.vel_sat = msg->vel_sat[i];
-//	    rdda->motor[i].rosOut.tau_sat = msg->tau_sat[i];
-//	    rdda->motor[i].rosOut.stiffness = msg->stiffness[i];
-//	    rdda->freq_anti_alias = msg->freq_anti_alias;
-//    }
-//
-//
-    //ROS_INFO("set stiffness[0]: %lf", msg->stiffness[0]);
-//    mutex_unlock(&rdda->mutex);
-//}
 
 /* Service functions */
 bool RDDNode::setMaxVel(rdda_interface::SetMaxVelocity::Request &req, rdda_interface::SetMaxVelocity::Response &res) {
@@ -190,7 +162,7 @@ int main(int argc, char** argv) {
     /* Map data structs to shared memory */
     /* Open and obtain shared memory pointers for master-input data */
     rdda = initRdda();
-    if (rdda == NULL) {
+    if (rdda == nullptr) {
         fprintf(stderr, "Init rdda failed.\n");
         printf("shm_open error, errno(%d): %s\n", errno, strerror(errno));
         exit(1);

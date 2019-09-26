@@ -11,8 +11,8 @@
 #include <std_msgs/Float64.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 #include <sensor_msgs/JointState.h>
-#include "rdda_interface/JointCommands.h"
-#include "rdda_interface/JointStates.h"
+//#include "rdda_interface/JointCommands.h"
+//#include "rdda_interface/JointStates.h"
 #include "rdda_interface/ControlState.h"
 
 #include "rdda_interface/SetMaxVelocity.h"
