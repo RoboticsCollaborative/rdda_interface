@@ -96,7 +96,7 @@ class RddaProxy:
 
     """ Fingers return to origin with arbitrary initial conditions. 
         Note: This functions is allowed only when fingers are centered manually. """
-    def homing(self):
+    def homing_trivial(self):
 
         """Make sure ROS message received"""
         while not self.has_stats_msg:
@@ -141,7 +141,7 @@ class RddaProxy:
 
     """ Each finger detect two hardstops then go back to origin. 
         Note: This function is used to center the fingers and record the origins & hard-stops. """
-    def homing_cmd_tau(self):
+    def homing(self):
 
         """Make sure ROS message received."""
         while not self.has_stats_msg:
@@ -200,6 +200,7 @@ class RddaProxy:
                 self.set_positions(positions=pos_ref)
                 rate.sleep()
             pos_ref[i] = self.joint_lower_bounds[i]
+            time.sleep(0.5)
             # self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
             self.set_positions(positions=pos_ref)
             rospy.loginfo("cmd_tau_measured_0: {}, cmd_tau_measured_1: {}, ref_pos_0: {}, ref_pos_1: {}"
@@ -227,7 +228,7 @@ class RddaProxy:
             rospy.loginfo("cmd_tau_measured_0: {}, cmd_tau_measured_1: {}, ref_pos_0: {}, ref_pos_1: {}"
                           .format(cmd_tau_measured[0], cmd_tau_measured[1], pos_ref[0], pos_ref[1]))
             rate.sleep()
-        time.sleep(0.1)
+        time.sleep(0.5)
 
     """Sinusoid wave for position tests on finger 0. 
         Finger will start at current position, make sure enough space to move."""
