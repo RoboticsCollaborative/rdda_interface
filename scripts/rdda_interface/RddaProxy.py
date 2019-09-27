@@ -200,12 +200,12 @@ class RddaProxy:
                 self.set_positions(positions=pos_ref)
                 rate.sleep()
             pos_ref[i] = self.joint_lower_bounds[i]
-            time.sleep(0.5)
             # self.publish_joint_cmds(pos_ref=pos_ref, stiffness=stiffness)
             self.set_positions(positions=pos_ref)
             rospy.loginfo("cmd_tau_measured_0: {}, cmd_tau_measured_1: {}, ref_pos_0: {}, ref_pos_1: {}"
                           .format(cmd_tau_measured[0], cmd_tau_measured[1], pos_ref[0], pos_ref[1]))
             rate.sleep()
+            time.sleep(0.5)
         time.sleep(1.5)
 
         """ Step3: Close fingers then record origin when colliding. """
