@@ -104,7 +104,7 @@ class RddaProxy:
 
         pos_ref = np.array([0.0, 0.0])
         stiffness = np.array([10, 10])
-        rate = rospy.Rate(500)
+        rate = rospy.Rate(20)
         time_interval = 0.0
         tau_threshold = np.array([0.14, 0.14])
         done_finger0 = False
@@ -113,7 +113,7 @@ class RddaProxy:
 
         self.set_stiffness(stiffness=stiffness)
         while not done and not rospy.is_shutdown():
-            time_interval += 2e-6
+            time_interval += 1e-5
             # pos_ref[0] = -1.0 * np.sin(time_interval)
             tau_measured = self.external_efforts
 
@@ -148,7 +148,6 @@ class RddaProxy:
 
         pos_ref = np.array([0.0, 0.0])
         stiffness = np.array([10, 10])
-        pos_measured = np.array([0.0, 0.0])
         cmd_tau_measured = np.array([0.0, 0.0])
         lower_threshold = 0.3
         upper_threshold = 0.6
@@ -156,21 +155,19 @@ class RddaProxy:
         check_upper_bounds = [False, False]
         check_lower_bounds = [False, False]
         check_origins = [False, False]
-        rate = rospy.Rate(500)
-        time_interval = 2.0e-3
+        rate = rospy.Rate(20)
+        time_interval = 0.05
         loop_num = 0
 
         """ Initialize fingers' stiffness before homing routine. """
         self.set_stiffness(stiffness=stiffness)
-        self.set_max_velocities(max_vel=[1, 1])
-        # self.set_stiffness(stiffness=[10, 10])
 
         """ Step1: Record the lower bounds of both fingers. """
         while not rospy.is_shutdown() and not (check_lower_bounds[0] and check_lower_bounds[1]):
             loop_num += 1
             # pos_measured = self.act_pos
             pos_measured = self.actual_positions
-            if loop_num > 200:
+            if loop_num > 10:
                 cmd_tau_measured = self.applied_efforts
             for i in range(2):
                 if not check_lower_bounds[i]:
@@ -190,11 +187,10 @@ class RddaProxy:
             while not rospy.is_shutdown() and not check_upper_bounds[i]:
                 loop_num += 1
                 pos_measured = self.actual_positions
-                if loop_num > 300:
+                if loop_num > 10:
                     cmd_tau_measured = self.applied_efforts
                 if np.absolute(cmd_tau_measured[i]) > upper_threshold and \
                         np.absolute(pos_measured[i]-self.joint_lower_bounds[i]) > 0.8:
-                # if np.absolute(cmd_tau_measured[i]) > upper_threshold:
                     self.joint_upper_bounds[i] = pos_measured[i]
                     check_upper_bounds[i] = True
                 else:
@@ -204,8 +200,8 @@ class RddaProxy:
             pos_ref[i] = self.joint_lower_bounds[i]
             self.set_positions(positions=pos_ref)
             rate.sleep()
-            time.sleep(3)
-        time.sleep(2)
+            time.sleep(1)
+        time.sleep(1)
 
         """ Step3: Close fingers then record origin when colliding. """
         cmd_tau_measured = [0.0, 0.0]
@@ -213,7 +209,7 @@ class RddaProxy:
         while not rospy.is_shutdown() and not (check_origins[0] and check_origins[1]):
             loop_num += 1
             pos_measured = self.actual_positions
-            if loop_num > 500:
+            if loop_num > 20:
                 cmd_tau_measured = self.applied_efforts
             for i in range(2):
                 if not check_origins[i]:
@@ -224,8 +220,9 @@ class RddaProxy:
                         pos_ref[i] += time_interval
             self.set_positions(positions=pos_ref)
             rate.sleep()
-        rospy.loginfo("lower[{}, {}], upper: [{}, {}]".format(self.joint_lower_bounds[0], self.joint_lower_bounds[1],
-                                                              self.joint_upper_bounds[0], self.joint_upper_bounds[1]))
+        rospy.loginfo("lower[{}, {}], upper: [{}, {}], origin: [{} {}]".format(self.joint_lower_bounds[0], self.joint_lower_bounds[1],
+                                                                               self.joint_upper_bounds[0], self.joint_upper_bounds[1],
+                                                                               self.joint_origins[0], self.joint_origins[1]))
         time.sleep(0.5)
 
     """Sinusoid wave for position tests on finger 0. 
@@ -234,13 +231,13 @@ class RddaProxy:
         pos_ref = np.array([0.0, 0.0])
         stiffness = np.array([5.0, 5.0])
         vel_sat = (5.0, 5.0)
-        rate = rospy.Rate(500)
+        rate = rospy.Rate(20)
         time_interval = 0.0
 
         self.set_stiffness(stiffness=stiffness)
         self.set_max_velocities(max_vel=vel_sat)
         while not rospy.is_shutdown():
-            time_interval += 2.0e-3
+            time_interval += 0.05
             pos_ref[0] = -0.5 * np.sin(time_interval)
             self.set_positions(positions=pos_ref)
             rospy.loginfo("pos_ref[0]: {}".format(pos_ref[0]))
