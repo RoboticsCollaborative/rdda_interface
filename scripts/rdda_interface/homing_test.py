@@ -8,7 +8,6 @@ def main():
     rospy.init_node('homing', anonymous=True)
 
     # rdda.homing()
-    # rdda.homing2()
     rdda.homing_cmd_tau()
     # rdda.harmonic_wave()
 
