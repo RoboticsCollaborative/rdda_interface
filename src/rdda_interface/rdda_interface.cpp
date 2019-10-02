@@ -144,7 +144,7 @@ bool RDDNode::setStiffness(rdda_interface::SetStiffness::Request &req, rdda_inte
 
 /* Run loop */
 void RDDNode::run() {
-    ros::Rate loop_rate(500);
+    ros::Rate loop_rate(20);
     while (ros::ok()) {
 	/* Publisher (wrap) */
 	pubJointStates();
