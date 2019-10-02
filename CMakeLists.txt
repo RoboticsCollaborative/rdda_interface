@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rdda_interface)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -53,14 +54,16 @@ add_message_files(
     FILES
     JointCommands.msg
     JointStates.msg
+    ControlState.msg
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+    FILES
+    SetMaxVelocity.srv
+    SetMaxEffort.srv
+    SetStiffness.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -136,7 +139,7 @@ add_library(${PROJECT_NAME}_src
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/rdda_interface/rdda_node.cpp)
+add_executable(${PROJECT_NAME}_node src/rdda_interface/rdda_interface.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
