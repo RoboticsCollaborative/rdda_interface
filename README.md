@@ -42,11 +42,26 @@ If you have ROS Kinetic installed, you should be good to go.
     roscd rdda_interface
     roslaunch rdda_interface rdda_interface.launch
     ```   
-    <img src="readme/interface_test.png" width="70%" border="0" /> 
+    A test to stream joints data with [plotJuggler](https://github.com/facontidavide/PlotJuggler).
+    <img src="readme/interface_test.png" width="80%" border="0" />
       
 ## Joint Control
+Obtain following joint states by subscribing to *"rdda_interface/joint_states"* ROS topic 
+with [sensor_msgs/JointState](http://docs.ros.org/melodic/api/sensor_msgs/html/msg/JointState.html) message.
+- float64[] position    ~   joint angles w.r.t. motor coords (rad)
+- float64[] velocity    ~   joint angles w.r.t. motor coords (rad/s)
+- float64[] effort      ~   external torque/force (Nm)
 
+Publish joint reference positions to *"rdda_interface/joint_cmds"* 
+with [trajectory_msgs/JointTrajectoryPoint](http://docs.ros.org/melodic/api/trajectory_msgs/html/msg/JointTrajectoryPoint.html) message.
+- float64[] positions   ~   joint reference position (rad)
 
 ## Parameter Tuning
+rdda_interface provides ROS services to tune dynamical parameters at runtime.
+- Velocity saturation     ~   "/rdda_interface/set_max_vel" (rad/s)
+- Effort/torque saturation    ~   "/rdda_interface/set_max_eff" (Nm)
+- Stiffness     ~   "/rdda_interface/set_stiff" (Nm/rad)
+
 
 ## Data Collection & Visualization
+Monitor the streaming data with [plotJuggler](https://github.com/facontidavide/PlotJuggler).
