@@ -42,8 +42,7 @@ If you have ROS Kinetic installed, you should be good to go.
     roscd rdda_interface
     roslaunch rdda_interface rdda_interface.launch
     ```   
-    ![image](readme/interface_test.png)
-    <img src="readme/interface_test.png" width="50%" border="0" /> 
+    <img src="readme/interface_test.png" width="70%" border="0" /> 
       
 ## Joint Control
 
