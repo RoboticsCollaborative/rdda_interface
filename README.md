@@ -28,17 +28,25 @@ If you have ROS Kinetic installed, you should be good to go.
 2. Install [RDDA Control Library](https://github.com/RoboticsCollaborative/RDDA)
 
 3. Clone the repository into the ROS package directory:
-   ```
-   git clone https://github.com/RoboticsCollaborative/rdda_interface
-   ```
+    ```
+    git clone https://github.com/RoboticsCollaborative/rdda_interface
+    ```
    
 4. Go to the directory of ROS workspace, then build the package:
-   ```
-   cd $<workspace>
-   catkin_make
-   ```
-   
+    ```
+    cd $<workspace>
+    catkin_make
+    ```
+5. If you can launch the interface, then you should be good to control the gripper:
+    ```
+    roscd rdda_interface
+    roslaunch rdda_interface rdda_interface.launch
+    ```   
+    ![image](readme/interface_test.png)
+    <img src="readme/interface_test.png" width="50%" border="0" /> 
+      
 ## Joint Control
+
 
 ## Parameter Tuning
 
