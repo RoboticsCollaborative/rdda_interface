@@ -34,7 +34,7 @@ If you have ROS Kinetic installed, you should be good to go.
    
 4. Go to the directory of ROS workspace, then build the package:
    ```
-   cd <workspace>
+   cd $<workspace>
    catkin_make
    ```
    
