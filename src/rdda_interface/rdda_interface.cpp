@@ -8,8 +8,8 @@ RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     rdda = rddaptr;
 
     rdda_joint_sub = nh_.subscribe("joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
-    rdda_joint_pub = nh_.advertise<sensor_msgs::JointState>("joint_stats", 1);
-    rdda_ctrl_pub = nh_.advertise<rdda_interface::ControlState>("ctrl_stats", 1);
+    rdda_joint_pub = nh_.advertise<sensor_msgs::JointState>("joint_states", 1);
+    rdda_ctrl_pub = nh_.advertise<rdda_interface::ControlState>("ctrl_states", 1);
 
     rdda_maxvel_srv = nh_.advertiseService("set_max_vel", &RDDNode::setMaxVel, this);
     rdda_maxeff_srv = nh_.advertiseService("set_max_eff", &RDDNode::setMaxEffort, this);

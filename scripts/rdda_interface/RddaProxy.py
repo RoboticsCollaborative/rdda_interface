@@ -16,12 +16,12 @@ class RddaProxy:
 
     def __init__(self):
         # self.joint_pub = rospy.Publisher("rdd/joint_cmds", JointCommands, queue_size=1)
-        # self.joint_sub = rospy.Subscriber("rdd/joint_stats", JointStates, self.subjointstates_callback)
+        # self.joint_sub = rospy.Subscriber("rdd/joint_states", JointStates, self.subjointstates_callback)
         self.joint_pub = rospy.Publisher("rdda_interface/joint_cmds", JointTrajectoryPoint, queue_size=1)
-        self.joint_sub = rospy.Subscriber("rdda_interface/joint_stats", JointState, self.subjointstates_callback)
-        self.ctrl_sub = rospy.Subscriber("rdda_interface/ctrl_stats", ControlState, self.subctrlstates_callback)
+        self.joint_sub = rospy.Subscriber("rdda_interface/joint_states", JointState, self.subjointstates_callback)
+        self.ctrl_sub = rospy.Subscriber("rdda_interface/ctrl_states", ControlState, self.subctrlstates_callback)
 
-        self.has_stats_msg = False
+        self.has_states_msg = False
         self.has_ctrl_msg = False
 
         """ Joint states """
@@ -36,17 +36,17 @@ class RddaProxy:
         self.joint_lower_bounds = [0.0, 0.0]
         self.joint_origins = [0.0, 0.0]
 
-    def subjointstates_callback(self, joint_stats_msg):
-        self.has_stats_msg = True
-        self.actual_positions = joint_stats_msg.position
-        self.actual_velocities = joint_stats_msg.velocity
-        self.external_efforts = joint_stats_msg.effort
+    def subjointstates_callback(self, joint_states_msg):
+        self.has_states_msg = True
+        self.actual_positions = joint_states_msg.position
+        self.actual_velocities = joint_states_msg.velocity
+        self.external_efforts = joint_states_msg.effort
         """ Ignore applied effort and time from ControlState. """
         # self.ts_nsec = JointStates_msg.header
 
-    def subctrlstates_callback(self, ctrl_stats_msg):
+    def subctrlstates_callback(self, ctrl_states_msg):
         self.has_ctrl_msg = True
-        self.applied_efforts = ctrl_stats_msg.applied_effort
+        self.applied_efforts = ctrl_states_msg.applied_effort
 
     """ Publish additive positions in the loop. """
     def set_positions(self, positions=(0.0, 0.0)):
@@ -99,7 +99,7 @@ class RddaProxy:
     def homing_trivial(self):
 
         """Make sure ROS message received"""
-        while not self.has_stats_msg:
+        while not self.has_states_msg:
             rospy.sleep(0.01)
 
         pos_ref = np.array([0.0, 0.0])
@@ -143,7 +143,7 @@ class RddaProxy:
     def homing(self):
 
         """Make sure ROS message received."""
-        while not self.has_stats_msg:
+        while not self.has_states_msg:
             rospy.sleep(0.01)
 
         pos_ref = np.array([0.0, 0.0])
