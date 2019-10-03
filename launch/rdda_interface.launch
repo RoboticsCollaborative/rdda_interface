@@ -21,7 +21,6 @@
 
   <!-- load the rdda_interface node -->
   <node pkg="rdda_interface" type="rdda_interface_node" name="rdda_interface" output="$(arg output)"> 
-  <node pkg="rdda_interface" type="homing_server"	name="homing_server">
 
     <!-- load the rdda_interface node parameters file.
          Note: Any parameters provided in this file will override those in yaml file, users should set the desired values in this launch file. -->
@@ -35,5 +34,7 @@
     <param name="need_homing"		value="$(arg need_homing)"		type="bool"/>
 
   </node>
+
+  <node pkg="rdda_interface" type="homing_server"	name="homing_server"></node>
 
 </launch>
