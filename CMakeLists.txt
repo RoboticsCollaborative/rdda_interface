@@ -63,6 +63,7 @@ add_service_files(
     SetMaxVelocity.srv
     SetMaxEffort.srv
     SetStiffness.srv
+    Homing.srv
 )
 
 ## Generate actions in the 'action' folder

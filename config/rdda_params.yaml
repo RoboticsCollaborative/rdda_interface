@@ -1,4 +1,12 @@
 anti_alias_freq: 20.0
+
+#Dynamical parameters
 max_vel: 3.0
 max_eff: 5.0
 stiff: 1.0
+
+#Homing
+need_homing: true
+upper_bounds: [0.0, 0.0]
+lower_bounds: [0.0, 0.0]
+origins: [0.0, 0.0]
