@@ -46,17 +46,15 @@ void RDDNode::initConfigParams() {
     mutex_unlock(&rdda->mutex);
 
     if (ros::param::get("~need_homing", need_homing)) {
-        if (need_homing) {
-            std::vector<double> origins;
-            rdda_interface::Homing homing_srv;
-            homing_srv.request.need_homing = need_homing;
-            if (rdda_homing_cli.call(homing_srv)) {
-                for (int i=0; i<2; ++i) {
-                    origins[i] = homing_srv.response.origins[i];
-                    ros::param::set("~origins", origins);
-                }
-                ROS_INFO("Joint Origins: [%lf, %lf]", origins[0], origins[1]);
+        std::vector<double> origins;
+        rdda_interface::Homing homing_srv;
+        homing_srv.request.need_homing = need_homing;
+        if (rdda_homing_cli.call(homing_srv)) {
+            for (int i=0; i<2; ++i) {
+                origins[i] = homing_srv.response.origins[i];
+                ros::param::set("~origins", origins);
             }
+            ROS_INFO("Joint Origins: [%lf, %lf]", origins[0], origins[1]);
         }
     }
 }
