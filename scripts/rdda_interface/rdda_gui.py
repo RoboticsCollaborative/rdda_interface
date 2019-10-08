@@ -25,7 +25,9 @@ class RosThread(QtCore.QThread):
 
         while not rospy.is_shutdown():
             if self._isRunning == True:
-                rdda.publish_joint_cmds(pos_ref=self.pos_ref, stiffness=self.stiffness)
+                #rdda.publish_joint_cmds(pos_ref=self.pos_ref, stiffness=self.stiffness)
+                rdda.set_stiffness(self.stiffness)
+                rdda.set_positions(self.pos_ref)
                 rospy.loginfo("set pos_ref[0]: {}".format(self.pos_ref))
                 rate.sleep()
             else:

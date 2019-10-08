@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import rospy
 from RddaProxy import RddaProxy
 
@@ -7,9 +8,7 @@ def main():
     rdda = RddaProxy()
     rospy.init_node('homing', anonymous=True)
 
-    # rdda.homing_trivial()
     rdda.homing()
-    # rdda.harmonic_wave()
 
 
 if __name__ == '__main__':

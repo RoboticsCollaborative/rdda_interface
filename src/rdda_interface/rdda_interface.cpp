@@ -16,7 +16,7 @@ RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     rdda_maxeff_srv = nh_.advertiseService("set_max_eff", &RDDNode::setMaxEffort, this);
     rdda_stiff_srv = nh_.advertiseService("set_stiff", &RDDNode::setStiffness, this);
 
-    rdda_homing_cli = nh_.serviceClient<rdda_interface::Homing>("/rdda_interface/homing");
+//    rdda_homing_cli = nh_.serviceClient<rdda_interface::Homing>("/rdda_interface/homing");
 }
 
 RDDNode::~RDDNode() = default;
@@ -24,7 +24,7 @@ RDDNode::~RDDNode() = default;
 /* Initialize interface with ROS parameters. */
 void RDDNode::initConfigParams() {
     double freq, stiff[2], max_vel[2], max_eff[2];
-    bool need_homing;
+//    bool need_homing;
 
     mutex_lock(&rdda->mutex);
 
@@ -45,18 +45,19 @@ void RDDNode::initConfigParams() {
 
     mutex_unlock(&rdda->mutex);
 
-    if (ros::param::get("~need_homing", need_homing)) {
-        std::vector<double> origins;
-        rdda_interface::Homing homing_srv;
-        homing_srv.request.need_homing = need_homing;
-        if (rdda_homing_cli.call(homing_srv)) {
-            for (int i=0; i<2; ++i) {
-                origins[i] = homing_srv.response.origins[i];
-                ros::param::set("~origins", origins);
-            }
-            ROS_INFO("Joint Origins: [%lf, %lf]", origins[0], origins[1]);
-        }
-    }
+//    if (ros::param::get("~need_homing", need_homing)) {
+//        std::vector<double> origins;
+//        rdda_interface::Homing homing_srv;
+//        homing_srv.request.need_homing = need_homing;
+//        if (rdda_homing_cli.call(homing_srv)) {
+//            for (int i=0; i<2; ++i) {
+//                origins[i] = homing_srv.response.origins[i];
+//                ros::param::set("~origins", origins);
+//            }
+//            ROS_INFO("Joint Origins: [%lf, %lf]", origins[0], origins[1]);
+//        }
+//    }
+
 }
 
 /* Publish joint state */
