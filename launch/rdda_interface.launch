@@ -35,7 +35,7 @@
 
   </node>
 
-  <node pkg="rdda_interface" type="homing.py" name="homing"/> 
+  <node pkg="rdda_interface" type="homing.py" name="homing"/>
 <!--  <node pkg="rdda_interface" type="homing_server"	name="homing_server"></node> -->
 
 </launch>
