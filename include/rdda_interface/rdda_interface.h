@@ -48,8 +48,6 @@ class RDDNode {
     ros::ServiceServer rdda_maxeff_srv;
     ros::ServiceServer rdda_stiff_srv;
 
-    ros::ServiceClient rdda_homing_cli;
-
     Rdda *rdda;
 
     void pubJointStates();
