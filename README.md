@@ -42,6 +42,13 @@ If you have ROS Kinetic installed, you should be good to go.
     roscd rdda_interface
     roslaunch rdda_interface rdda_interface.launch
     ```   
+   To request the homing routine when launching the interface, set the argument:
+   ```
+   roslaunch rdda_interface rdda_interface.launch home:=1
+   ```
+   The homing routine is only required to run once after launching roscore,
+   such that you can obtain upper/lower bounds and origins of the gripper through rosparam.
+   
     A test to stream joints data with [plotJuggler](https://github.com/facontidavide/PlotJuggler).
     <img src="readme/interface_test.png" width="80%" border="0" />
       

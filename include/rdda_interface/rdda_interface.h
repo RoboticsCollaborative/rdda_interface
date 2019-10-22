@@ -18,6 +18,7 @@
 #include "rdda_interface/SetMaxVelocity.h"
 #include "rdda_interface/SetMaxEffort.h"
 #include "rdda_interface/SetStiffness.h"
+#include "rdda_interface/Homing.h"
 
 
 /* C headers */
@@ -37,13 +38,17 @@ class RDDNode {
 
  private:
     ros::NodeHandle nh_;
+
     ros::Subscriber rdda_joint_sub;
+
     ros::Publisher rdda_joint_pub;
     ros::Publisher rdda_ctrl_pub;
 
     ros::ServiceServer rdda_maxvel_srv;
     ros::ServiceServer rdda_maxeff_srv;
     ros::ServiceServer rdda_stiff_srv;
+
+    ros::ServiceClient rdda_homing_cli;
 
     Rdda *rdda;
 

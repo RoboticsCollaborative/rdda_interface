@@ -8,6 +8,7 @@ RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     rdda = rddaptr;
 
     rdda_joint_sub = nh_.subscribe("joint_cmds", 1, &RDDNode::subJointCommands_callback, this);
+
     rdda_joint_pub = nh_.advertise<sensor_msgs::JointState>("joint_states", 1);
     rdda_ctrl_pub = nh_.advertise<rdda_interface::ControlState>("ctrl_states", 1);
 
@@ -21,6 +22,7 @@ RDDNode::~RDDNode() = default;
 /* Initialize interface with ROS parameters. */
 void RDDNode::initConfigParams() {
     double freq, stiff[2], max_vel[2], max_eff[2];
+//    bool need_homing;
 
     mutex_lock(&rdda->mutex);
 
@@ -144,7 +146,7 @@ bool RDDNode::setStiffness(rdda_interface::SetStiffness::Request &req, rdda_inte
 
 /* Run loop */
 void RDDNode::run() {
-    ros::Rate loop_rate(500);
+    ros::Rate loop_rate(20);
     while (ros::ok()) {
 	/* Publisher (wrap) */
 	pubJointStates();
