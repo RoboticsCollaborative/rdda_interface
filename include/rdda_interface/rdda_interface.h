@@ -14,12 +14,10 @@
 //#include "rdda_interface/JointCommands.h"
 //#include "rdda_interface/JointStates.h"
 #include "rdda_interface/ControlState.h"
-
 #include "rdda_interface/SetMaxVelocity.h"
 #include "rdda_interface/SetMaxEffort.h"
 #include "rdda_interface/SetStiffness.h"
 #include "rdda_interface/Homing.h"
-
 
 /* C headers */
 extern "C" {

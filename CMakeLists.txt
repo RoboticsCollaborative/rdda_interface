@@ -141,6 +141,7 @@ add_library(${PROJECT_NAME}_src
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/rdda_interface/rdda_interface.cpp)
+add_executable(${PROJECT_NAME}_hrs_publisher src/rdda_interface/highrate_state_publisher.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,6 +156,11 @@ add_executable(${PROJECT_NAME}_node src/rdda_interface/rdda_interface.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_src ${catkin_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_node 
+    ${catkin_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PROJECT_NAME}_src
+)
+target_link_libraries(${PROJECT_NAME}_hrs_publisher
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
     ${PROJECT_NAME}_src

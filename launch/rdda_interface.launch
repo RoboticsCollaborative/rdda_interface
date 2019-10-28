@@ -32,6 +32,7 @@
 
   <!-- load the rdda_interface node -->
   <node pkg="rdda_interface" type="rdda_interface_node" name="rdda_interface" output="$(arg output)"/>
+  <node pkg="rdda_interface" type="rdda_interface_hrs_publisher" name="highrate_state_publisher"/>
  
   <group if="$(eval arg('home')==1)">
     <node pkg="rdda_interface" type="homing.py" name="homing" args="$(arg home)"/>
