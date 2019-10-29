@@ -81,19 +81,6 @@ class RddaProxy:
         except rospy.ServiceException, e:
             print "Service call failed: %s" % e
 
-    # def publish_joint_cmds(self, pos_ref=(0.0, 0.0), vel_sat=(5.0, 5.0),
-    # tau_sat=(5.0, 5.0), stiffness=(0.0, 0.0), freq_anti_alias=500.0):
-        # joint_cmd_msg = JointCommands()
-        # JointCommands_msg = JointTrajectoryPoint()
-        # JointCommands_msg.positions
-        # joint_cmd_msg.pos_ref = pos_ref
-        # joint_cmd_msg.vel_sat = vel_sat
-        # joint_cmd_msg.tau_sat = tau_sat
-        # joint_cmd_msg.stiffness = stiffness
-        # joint_cmd_msg.freq_anti_alias = freq_anti_alias
-
-        # self.joint_pub.publish(JointCommands_msg)
-
     """ Fingers return to origin with arbitrary initial conditions. 
         Note: This functions is allowed only when fingers are centered manually. """
     def homing_trivial(self):
@@ -225,7 +212,7 @@ class RddaProxy:
                                                                                self.joint_origins[0], self.joint_origins[1]))
         time.sleep(0.5)
 
-    """Sinusoid wave for position tests on finger 0. 
+    """ Sinusoid wave for position tests on finger 0. 
         Finger will start at current position, make sure enough space to move."""
     def harmonic_wave(self):
         pos_ref = np.array([0.0, 0.0])
@@ -242,3 +229,25 @@ class RddaProxy:
             self.set_positions(positions=pos_ref)
             rospy.loginfo("pos_ref[0]: {}".format(pos_ref[0]))
             rate.sleep()
+
+    """ Fingers go back to origin. """
+    def close(self):
+        has_home = rospy.get_param('/has_home')
+        if has_home:
+            origin = rospy.get_param('/origins')
+            stiffness = np.array([5.0, 5.0])
+            self.set_stiffness(stiffness=stiffness)
+            self.set_positions(positions=origin)
+        else:
+            print("Need home.")
+
+    """ Fingers go to lower bounds. """
+    def open(self):
+        has_home = rospy.get_param('/has_home')
+        if has_home:
+            lower_bounds = rospy.get_param('/lower_bounds')
+            stiffness = np.array([5.0, 5.0])
+            self.set_stiffness(stiffness=stiffness)
+            self.set_positions(lower_bounds)
+        else:
+            print("Need home.")
