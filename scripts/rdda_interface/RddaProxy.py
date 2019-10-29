@@ -235,8 +235,6 @@ class RddaProxy:
         has_home = rospy.get_param('/has_home')
         if has_home:
             origin = rospy.get_param('/origins')
-            stiffness = np.array([5.0, 5.0])
-            self.set_stiffness(stiffness=stiffness)
             self.set_positions(positions=origin)
         else:
             print("Need home.")
@@ -246,8 +244,6 @@ class RddaProxy:
         has_home = rospy.get_param('/has_home')
         if has_home:
             lower_bounds = rospy.get_param('/lower_bounds')
-            stiffness = np.array([5.0, 5.0])
-            self.set_stiffness(stiffness=stiffness)
             self.set_positions(lower_bounds)
         else:
             print("Need home.")
