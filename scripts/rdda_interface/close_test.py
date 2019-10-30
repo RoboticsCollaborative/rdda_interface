@@ -6,6 +6,7 @@ from RddaProxy import RddaProxy
 
 def main():
     rdda = RddaProxy()
+    rospy.init_node('close', anonymous=True)
 
     rdda.close()
 
