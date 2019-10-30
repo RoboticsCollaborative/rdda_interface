@@ -243,7 +243,7 @@ class RddaProxy:
     def open(self):
         has_home = rospy.get_param('/has_home')
         if has_home:
-            lower_bounds = (rospy.get_param('/lower_bounds'))/2.0
+            lower_bounds = rospy.get_param('/lower_bounds')
             self.set_positions(lower_bounds)
         else:
             print("Need home.")
