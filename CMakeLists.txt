@@ -64,6 +64,7 @@ add_service_files(
     SetMaxEffort.srv
     SetStiffness.srv
     Homing.srv
+    ContactCheck.srv
 )
 
 ## Generate actions in the 'action' folder
