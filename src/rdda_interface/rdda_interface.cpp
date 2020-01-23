@@ -15,6 +15,7 @@ RDDNode::RDDNode(ros::NodeHandle &node, Rdda *rddaptr) {
     rdda_maxvel_srv = nh_.advertiseService("set_max_vel", &RDDNode::setMaxVel, this);
     rdda_maxeff_srv = nh_.advertiseService("set_max_eff", &RDDNode::setMaxEffort, this);
     rdda_stiff_srv = nh_.advertiseService("set_stiff", &RDDNode::setStiffness, this);
+    rdda_contact_srv = nh_.advertiseService("check_contact", &RDDNode::getContactFlag, this);
 }
 
 RDDNode::~RDDNode() = default;
@@ -144,6 +145,25 @@ bool RDDNode::setStiffness(rdda_interface::SetStiffness::Request &req, rdda_inte
 
     mutex_unlock(&rdda->mutex);
     return true;
+}
+
+bool RDDNode::getContactFlag(rdda_interface::CheckContact::Request &req, rdda_interface::CheckContact::Response &res) {
+
+    if (req.need_check == 1) {
+
+        mutex_lock(&rdda->mutex);
+
+        res.contact_flag.resize(2);
+
+        for (int i=0; i<2; ++i) {
+            res.contact_flag[i] = rdda->motor[i].rosIn.contact_flag;
+        }
+
+        mutex_unlock(&rdda->mutex);
+        return true;
+
+    } else
+        return false;
 }
 
 /* Run loop */

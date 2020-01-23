@@ -7,6 +7,7 @@ from rdda_interface.msg import ControlState
 from rdda_interface.srv import SetStiffness
 from rdda_interface.srv import SetMaxVelocity
 from rdda_interface.srv import SetMaxEffort
+from rdda_interface.srv import CheckContact
 
 import time
 import numpy as np
@@ -77,6 +78,15 @@ class RddaProxy:
         try:
             set_max_eff = rospy.ServiceProxy('rdda_interface/set_max_eff', SetMaxEffort)
             res = set_max_eff(max_eff)
+            return res
+        except rospy.ServiceException, e:
+            print "Service call failed: %s" % e
+
+    def get_contact_flag(self, need_check=1):
+        rospy.wait_for_service('/rdda_interface/check_contact')
+        try:
+            get_contact_flag = rospy.ServiceProxy('rdda_interface/check_contact', CheckContact)
+            res = get_contact_flag(need_check)
             return res
         except rospy.ServiceException, e:
             print "Service call failed: %s" % e

@@ -19,7 +19,7 @@
 #include "rdda_interface/SetMaxEffort.h"
 #include "rdda_interface/SetStiffness.h"
 #include "rdda_interface/Homing.h"
-
+#include "rdda_interface/CheckContact.h"
 
 /* C headers */
 extern "C" {
@@ -47,6 +47,7 @@ class RDDNode {
     ros::ServiceServer rdda_maxvel_srv;
     ros::ServiceServer rdda_maxeff_srv;
     ros::ServiceServer rdda_stiff_srv;
+    ros::ServiceServer rdda_contact_srv;
 
     Rdda *rdda;
 
@@ -57,6 +58,7 @@ class RDDNode {
     bool setMaxVel(rdda_interface::SetMaxVelocity::Request &req, rdda_interface::SetMaxVelocity::Response &res);
     bool setMaxEffort(rdda_interface::SetMaxEffort::Request &req, rdda_interface::SetMaxEffort::Response &res);
     bool setStiffness(rdda_interface::SetStiffness::Request &req, rdda_interface::SetStiffness::Response &res);
+    bool getContactFlag(rdda_interface::CheckContact::Request &req, rdda_interface::CheckContact::Response &res);
 };
 
 #endif /* RDDA_NODE */
