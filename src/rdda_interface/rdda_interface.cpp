@@ -53,6 +53,7 @@ void RDDNode::pubJointStates() {
     JointStates_msg.effort.resize(2);
     rdda_interface::ControlState ControlStates_msg;
     ControlStates_msg.applied_effort.resize(2);
+    ControlStates_msg.check_contact.resize(2);
 
     mutex_lock(&rdda->mutex);
 
@@ -63,6 +64,7 @@ void RDDNode::pubJointStates() {
         JointStates_msg.position[i] = rdda->motor[i].motorIn.act_pos;
         JointStates_msg.velocity[i] = rdda->motor[i].motorIn.act_vel;
         ControlStates_msg.applied_effort[i] = rdda->motor[i].motorIn.act_tau;
+        ControlStates_msg.check_contact[i] = rdda->motor[i].rosIn.contact_flag;
     }
     JointStates_msg.effort[0] = rdda->psensor.analogIn.val1;
     JointStates_msg.effort[1] = rdda->psensor.analogIn.val2;
